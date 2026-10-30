@@ -30,7 +30,7 @@ export default function Home() {
       setRecipes(list);
     } catch (err) {
       console.error('Failed to load recipes:', err);
-      setError('Could not connect to the recipe server. Please verify the backend is running.');
+      setError('We couldn’t reach the kitchen right now. Please check your internet connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-eyebrow">
           <ChefHat size={15} />
-          <span>Object-Oriented Culinary Journal</span>
+          <span>The Art of Home Cooking</span>
         </div>
 
         <h1 className="hero-title">
@@ -131,7 +131,7 @@ export default function Home() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--text-muted)' }}>
           <RefreshCw size={36} className="spin" style={{ animation: 'spin 1s linear infinite', marginBottom: '1rem' }} />
-          <p style={{ fontSize: '1.05rem', fontWeight: 500 }}>Fetching recipes from kitchen API...</p>
+          <p style={{ fontSize: '1.05rem', fontWeight: 500 }}>Gathering today&apos;s recipes…</p>
         </div>
       ) : error ? (
         <div className="empty-state">
@@ -142,7 +142,7 @@ export default function Home() {
           </p>
           <button type="button" className="btn btn-secondary" onClick={fetchRecipes}>
             <RefreshCw size={16} />
-            <span>Retry Connection</span>
+            <span>Try Again</span>
           </button>
         </div>
       ) : recipes.length === 0 ? (

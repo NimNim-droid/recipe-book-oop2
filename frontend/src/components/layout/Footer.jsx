@@ -7,13 +7,13 @@ export default function Footer() {
       <div className="container footer-inner">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontWeight: 600 }}>
           <UtensilsCrossed size={18} color="var(--primary)" />
-          <span>Savoria — Object-Oriented Culinary Management</span>
+          <span>Savoria — Culinary Journal</span>
         </div>
         <p style={{ maxWidth: '500px', fontSize: '0.85rem' }}>
-          Decoupled Full-Stack Architecture powered by Laravel 11 REST API &amp; React 18 View. Built for OOP2 Finals.
+          Discover, create, and organize recipes your whole table will love — from quick weeknight dinners to weekend baking projects.
         </p>
         <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
-          &copy; {new Date().getFullYear()} Savoria. Designed for thoughtful cooks and clean architecture.
+          &copy; {new Date().getFullYear()} Savoria. Made for people who love to cook.
         </p>
       </div>
     </footer>

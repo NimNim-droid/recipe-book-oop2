@@ -194,7 +194,7 @@ export default function RecipeForm({ isEdit = false }) {
         setValidationErrors(err.response.data.errors);
         setErrorMessage('Please correct the highlighted form errors below.');
       } else {
-        setErrorMessage(err.response?.data?.message || 'Failed to save recipe. Please check your backend connection.');
+        setErrorMessage(err.response?.data?.message || 'We couldn’t save your recipe. Please check your internet connection and try again.');
       }
     } finally {
       setSubmitting(false);
@@ -205,7 +205,7 @@ export default function RecipeForm({ isEdit = false }) {
     return (
       <div className="container" style={{ textAlign: 'center', padding: '6rem 0', color: 'var(--text-muted)' }}>
         <RefreshCw size={36} className="spin" style={{ animation: 'spin 1s linear infinite', marginBottom: '1rem' }} />
-        <p style={{ fontSize: '1.05rem', fontWeight: 500 }}>Loading recipe blueprint...</p>
+        <p style={{ fontSize: '1.05rem', fontWeight: 500 }}>Loading recipe…</p>
       </div>
     );
   }

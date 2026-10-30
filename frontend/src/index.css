@@ -903,3 +903,76 @@ button, input, textarea, select {
     transform: translateY(0);
   }
 }
+
+/* ==========================================================================
+   Responsive Hardening
+   Prevents horizontal overflow (e.g., large headings clipped on
+   phone viewports) and tightens spacing on small screens.
+   ========================================================================== */
+
+/* Clip anything that would force a horizontal scrollbar.
+   `clip` (not `hidden`) deliberately avoids creating a scroll
+   container, so position:sticky keeps working. */
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+/* Long words/titles must wrap instead of pushing out of the viewport */
+h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+img, video {
+  max-width: 100%;
+}
+
+/* Small-screen refinements (phones, ~320–480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .hero {
+    padding: 2.75rem 0 2rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.9rem, 7.5vw, 3.4rem);
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.4rem;
+    font-size: 1rem;
+  }
+
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .details-banner {
+    height: 260px;
+  }
+
+  .stats-bar {
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .form-card {
+    padding: 1.6rem 1.25rem;
+  }
+
+  .footer {
+    padding: 2.5rem 0;
+  }
+}
