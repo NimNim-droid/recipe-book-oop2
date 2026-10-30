@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { Plus, Trash2, ArrowLeft, Image as ImageIcon, Save, RefreshCw, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Image as ImageIcon, Save, RefreshCw, AlertCircle, UploadCloud, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
 import api from '../services/api';
 
 const CATEGORIES = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Baking', 'Vegetarian', 'Snack', 'Beverage', 'Other'];
@@ -37,6 +37,11 @@ export default function RecipeForm({ isEdit = false }) {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
+
+  // Local image upload handling
+  const [imageMode, setImageMode] = useState('upload'); // 'upload' | 'url'
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   // Fetch recipe data if in Edit mode
   useEffect(() => {
@@ -101,6 +106,42 @@ export default function RecipeForm({ isEdit = false }) {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('Image size must be less than 10MB.');
+      return;
+    }
+
+    setUploadingImage(true);
+    setUploadError('');
+
+    try {
+      const uploadData = new FormData();
+      uploadData.append('image', file);
+
+      const res = await api.post('/upload-image', uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data?.url) {
+        setFormData((prev) => ({
+          ...prev,
+          image_url: res.data.url,
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+      setUploadError(
+        err.response?.data?.message || 'Failed to upload image from your computer. Please try another photo.'
+      );
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   // Ingredients handlers
@@ -363,29 +404,142 @@ export default function RecipeForm({ isEdit = false }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="image_url">Photo Image URL</label>
-              <input
-                id="image_url"
-                name="image_url"
-                type="url"
-                className="form-input"
-                placeholder="https://images.unsplash.com/photo-..."
-                value={formData.image_url}
-                onChange={handleInputChange}
-              />
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '0.35rem', display: 'block' }}>
-                Paste any high-resolution image link from Unsplash or web.
-              </span>
+              <label className="form-label">Recipe Cover Photo</label>
 
-              {formData.image_url && (
-                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <img
-                    src={formData.image_url}
-                    alt="Preview"
-                    style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }}
-                    onError={(e) => { e.currentTarget.src = DEFAULT_IMAGE; }}
+              {/* Upload Mode Selector */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`chip ${imageMode === 'upload' ? 'active' : ''}`}
+                  onClick={() => setImageMode('upload')}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.4rem 0.95rem' }}
+                >
+                  <UploadCloud size={15} />
+                  <span>Upload from Computer</span>
+                </button>
+                <button
+                  type="button"
+                  className={`chip ${imageMode === 'url' ? 'active' : ''}`}
+                  onClick={() => setImageMode('url')}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.4rem 0.95rem' }}
+                >
+                  <LinkIcon size={14} />
+                  <span>Paste Web Link</span>
+                </button>
+              </div>
+
+              {imageMode === 'upload' ? (
+                <div
+                  style={{
+                    border: '2px dashed var(--border-light)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1.75rem 1.25rem',
+                    textAlign: 'center',
+                    backgroundColor: 'var(--bg-canvas)',
+                    position: 'relative',
+                    cursor: uploadingImage ? 'wait' : 'pointer',
+                    transition: 'border-color 0.2s ease',
+                  }}
+                >
+                  <input
+                    type="file"
+                    id="image-file-input"
+                    accept="image/png, image/jpeg, image/jpg, image/webp, image/gif, image/avif"
+                    onChange={handleFileUpload}
+                    disabled={uploadingImage}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      opacity: 0,
+                      cursor: uploadingImage ? 'wait' : 'pointer',
+                      width: '100%',
+                      height: '100%',
+                    }}
                   />
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Image Preview</span>
+                  {uploadingImage ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                      <RefreshCw size={28} className="spin" color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+                      <p style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                        Uploading picture from computer...
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <UploadCloud size={34} color="var(--primary)" style={{ margin: '0 auto 0.5rem', display: 'block' }} />
+                      <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+                        Click to browse or drop your downloaded picture
+                      </p>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', display: 'block' }}>
+                        Supports JPG, PNG, WEBP, or GIF from your device (Max 10MB)
+                      </span>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <input
+                    id="image_url"
+                    name="image_url"
+                    type="url"
+                    className="form-input"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={formData.image_url}
+                    onChange={handleInputChange}
+                  />
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '0.35rem', display: 'block' }}>
+                    Paste any image link from Unsplash or the web.
+                  </span>
+                </>
+              )}
+
+              {uploadError && (
+                <div style={{ color: '#DC2626', fontSize: '0.82rem', marginTop: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <AlertCircle size={15} />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+
+              {/* Active Image Preview Card */}
+              {formData.image_url && (
+                <div
+                  style={{
+                    marginTop: '1rem',
+                    padding: '0.75rem 1rem',
+                    backgroundColor: 'var(--bg-surface)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    boxShadow: 'var(--shadow-sm)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', overflow: 'hidden' }}>
+                    <img
+                      src={formData.image_url}
+                      alt="Recipe Preview"
+                      style={{ width: '70px', height: '52px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', flexShrink: 0 }}
+                      onError={(e) => { e.currentTarget.src = DEFAULT_IMAGE; }}
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--sage)' }}>
+                        <CheckCircle2 size={15} /> Picture Ready
+                      </span>
+                      <p style={{ fontSize: '0.76rem', color: 'var(--text-dim)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '340px' }}>
+                        {formData.image_url}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', flexShrink: 0 }}
+                    onClick={() => setFormData((prev) => ({ ...prev, image_url: '' }))}
+                  >
+                    Change / Remove
+                  </button>
                 </div>
               )}
             </div>
