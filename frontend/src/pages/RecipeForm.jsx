@@ -150,7 +150,7 @@ export default function RecipeForm({ isEdit = false }) {
       .filter((ing) => ing.name.trim() !== '')
       .map((ing) => ({
         name: ing.name.trim(),
-        amount: ing.amount !== '' && !isNaN(ing.amount) ? parseFloat(ing.amount) : null,
+        amount: ing.amount !== '' && ing.amount !== null && ing.amount !== undefined ? String(ing.amount).trim() : null,
         unit: ing.unit.trim() || null,
       }));
 

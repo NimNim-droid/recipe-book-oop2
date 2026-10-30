@@ -17,11 +17,26 @@ export default function IngredientList({ ingredients = [], servings = 4, baseSer
   };
 
   const scaleAmount = (amount) => {
-    if (amount === null || amount === undefined || isNaN(amount)) return '';
+    if (amount === null || amount === undefined) return '';
+    const str = String(amount).trim();
+    if (!str) return '';
+
+    // Handle fractions like "1/2" or "3/4"
+    let numeric = Number(str);
+    if (isNaN(numeric) && str.includes('/')) {
+      const parts = str.split('/');
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && Number(parts[1]) !== 0) {
+        numeric = Number(parts[0]) / Number(parts[1]);
+      }
+    }
+
+    if (isNaN(numeric)) {
+      return str;
+    }
+
     const ratio = (servings || 4) / (baseServings || 4);
-    const scaled = Number(amount) * ratio;
-    
-    // Format nicely: if integer, show as integer; otherwise max 2 decimals
+    const scaled = numeric * ratio;
+
     if (Number.isInteger(scaled)) return scaled.toString();
     const formatted = scaled.toFixed(2);
     return formatted.replace(/\.?0+$/, '');
